@@ -6,7 +6,10 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
+
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +19,7 @@ import java.util.UUID;
 
 public class BluetoothChatService
 {
-    private static final String TAG = "BluetoothConnectionServ";
+    private static final String TAG = "BluetoothChatService";
     private static final String appName = "MYAPP";
     private static final UUID MY_UUID_INSECURE = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
 
@@ -35,6 +38,7 @@ public class BluetoothChatService
     {
         this.context = context;
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        start();
     }
 
     //Start Connection Service
@@ -64,6 +68,18 @@ public class BluetoothChatService
 
         connectThread = new ConnectThread(device, uuid);
         connectThread.start();
+    }
+
+    public void connected(BluetoothSocket socket, BluetoothDevice device)
+    {
+        connectedThread = new ConnectedThread(socket);
+        connectedThread.start();
+    }
+
+    //Write to ConnectedThread unsynchronized
+    public void write(byte[] out)
+    {
+        connectedThread.write(out);
     }
 
     // Thread for listening to incoming connections
@@ -205,7 +221,11 @@ public class BluetoothChatService
             OutputStream tmpOutput = null;
 
             //Dismiss progress dialog when connection is established
-            progressDialog.dismiss();
+            try
+            {
+                progressDialog.dismiss();
+            }
+            catch(NullPointerException e){ }
 
             try
             {
@@ -234,6 +254,10 @@ public class BluetoothChatService
                     bytes = inputStream.read(buffer);
                     String incomingMessage = new String(buffer, 0, bytes);
                     Log.d(TAG, "InputStream: " + incomingMessage);
+
+                    Intent intent = new Intent("incomingMessage");
+                    intent.putExtra("thomascasse.message", incomingMessage);
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                 }
                 catch (IOException e)
                 {
@@ -245,7 +269,6 @@ public class BluetoothChatService
         public void write(byte[] bytes)
         {
             String text = new String(bytes, Charset.defaultCharset());
-
             Log.d(TAG, "Write: Writing to OutputStream: " + text);
 
             try
