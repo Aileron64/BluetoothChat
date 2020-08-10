@@ -153,6 +153,7 @@ public class MainActivity extends AppCompatActivity
         sendBtn = findViewById(R.id.sendBtn);
         sendText = findViewById(R.id.sendText);
 
+        messages = new StringBuilder();
         chatBox = findViewById(R.id.chatBox);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, new IntentFilter("incomingMessage"));
