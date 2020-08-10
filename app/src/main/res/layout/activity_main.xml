@@ -12,6 +12,19 @@
     tools:context=".MainActivity">
 
 
+    <TextView
+        android:id="@+id/label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Target Device:" />
+
+    <TextView
+        android:id="@+id/deviceLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="None"
+        android:textSize="18sp" />
+
     <Button
         android:id="@+id/enableDiscoverBtn"
         android:layout_width="match_parent"
@@ -19,10 +32,17 @@
         android:text="Enable Discoverable" />
 
     <Button
+        android:id="@+id/discoverBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Discover" />
+
+    <Button
         android:id="@+id/startBtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Start Connection" />
+        android:text="Start Connection"
+        android:visibility="gone" />
 
     <EditText
         android:id="@+id/sendText"
@@ -30,24 +50,21 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:hint="Enter Text Here"
-        android:inputType="textPersonName" />
+        android:inputType="textPersonName"
+        android:visibility="gone" />
 
     <Button
         android:id="@+id/sendBtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Send" />
+        android:text="Send"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/chatBox"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <Button
-        android:id="@+id/discoverBtn"
-        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Discover" />
+        android:textSize="24sp" />
 
     <ListView
         android:id="@+id/deviceList"

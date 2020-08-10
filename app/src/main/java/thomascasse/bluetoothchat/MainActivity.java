@@ -1,9 +1,11 @@
 package thomascasse.bluetoothchat;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.Manifest;
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -26,7 +28,7 @@ import java.util.UUID;
 
 import thomascasse.bluetoothchat.R;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends Activity
 {
     private static final String TAG = "Main";
 
@@ -39,6 +41,7 @@ public class MainActivity extends AppCompatActivity
 
     StringBuilder messages;
     TextView chatBox;
+    TextView deviceLabel;
 
     BluetoothDevice device;
     BluetoothChatService bluetoothService;
@@ -120,7 +123,7 @@ public class MainActivity extends AppCompatActivity
                     //if bonded already
                     case BluetoothDevice.BOND_BONDED:
                         Log.d(TAG, "BOND BONDED");
-                        device = extraDevice;
+                        setDevice(extraDevice);
                         break;
 
                     //if creating bond
@@ -155,6 +158,7 @@ public class MainActivity extends AppCompatActivity
 
         messages = new StringBuilder();
         chatBox = findViewById(R.id.chatBox);
+        deviceLabel = findViewById(R.id.deviceLabel);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, new IntentFilter("incomingMessage"));
 
@@ -169,6 +173,8 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view)
             {
                 startBTConnection(device, MY_UUID_INSECURE);
+                sendText.setVisibility(View.VISIBLE);
+                sendBtn.setVisibility(View.VISIBLE);
             }
         });
 
@@ -181,6 +187,8 @@ public class MainActivity extends AppCompatActivity
                 byte[] bytes = sendText.getText().toString().getBytes(Charset.defaultCharset());
                 bluetoothService.write(bytes);
 
+                messages.append(sendText.getText().toString() + "\n");
+                chatBox.setText(messages);
                 sendText.setText("");
             }
         });
@@ -205,6 +213,7 @@ public class MainActivity extends AppCompatActivity
         // ----------- Discover Button --------------
         discoverBtn.setOnClickListener(new View.OnClickListener()
         {
+            @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
             public void onClick(View view)
             {
@@ -236,8 +245,7 @@ public class MainActivity extends AppCompatActivity
                 {
                     Log.d(TAG, "Trying to pair with " + deviceName);
                     btDevices.get(i).createBond();
-
-                    device = btDevices.get(i);
+                    setDevice(btDevices.get(i));
                     bluetoothService = new BluetoothChatService(MainActivity.this);
                 }
             }
@@ -256,6 +264,13 @@ public class MainActivity extends AppCompatActivity
         }
     };
 
+    public void setDevice(BluetoothDevice d)
+    {
+        device = d;
+        deviceLabel.setText(device.getName());
+        startBtn.setVisibility(View.VISIBLE);
+    }
+
     public void startBTConnection(BluetoothDevice device, UUID uuid)
     {
         Log.d(TAG, "Starting Bluetooth Connection");
@@ -263,6 +278,7 @@ public class MainActivity extends AppCompatActivity
         bluetoothService.startClient(device, uuid);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     private void checkBTPermissions()
     {
         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP)
